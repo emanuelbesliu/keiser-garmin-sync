@@ -5,7 +5,7 @@ cloud-to-cloud, with **no Bluetooth hardware** and **no third-party bridge
 service**. Run it on demand from your laptop, or self-host it so every ride
 shows up in Garmin automatically.
 
-[![CI](https://github.com/emanuelbesliu/keiser-garmin-sync/actions/workflows/ci.yml/badge.svg)](https://github.com/emanuelbesliu/keiser-garmin-sync/actions/workflows/ci.yml)
+[![CI](https://github.com/emanuelbesliu/keiser-garmin-sync/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/emanuelbesliu/keiser-garmin-sync/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 
