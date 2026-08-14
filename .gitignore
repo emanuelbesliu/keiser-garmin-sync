@@ -1,0 +1,35 @@
+# byte-compiled / caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# virtualenvs
+.venv/
+venv/
+env/
+
+# local runtime data / secrets
+*.db
+*.db-wal
+*.db-shm
+garmin-tokens/
+.env
+config.toml
+keiser-garmin-sync.toml
+*.tcx
+*.fit
+
+# tooling
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# editor / OS
+.idea/
+.vscode/
+.DS_Store

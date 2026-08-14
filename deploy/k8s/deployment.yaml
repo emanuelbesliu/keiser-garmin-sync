@@ -1,0 +1,82 @@
+# Generic Kubernetes manifests for keiser-garmin-sync.
+#
+#   kubectl create namespace keiser-garmin-sync
+#   # edit secret.example.yaml with your credentials, then:
+#   kubectl -n keiser-garmin-sync apply -f secret.example.yaml
+#   kubectl -n keiser-garmin-sync apply -f pvc.yaml -f deployment.yaml -f service.yaml
+#
+# Prefer an external secret manager (Infisical, External Secrets Operator,
+# Sealed Secrets, ...) over the plain Secret in secret.example.yaml.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keiser-garmin-sync
+  labels:
+    app: keiser-garmin-sync
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate            # single SQLite writer on an RWO PVC
+  selector:
+    matchLabels:
+      app: keiser-garmin-sync
+  template:
+    metadata:
+      labels:
+        app: keiser-garmin-sync
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+      containers:
+        - name: keiser-garmin-sync
+          image: ghcr.io/emanuelbesliu/keiser-garmin-sync:latest
+          imagePullPolicy: Always
+          # default CMD runs `serve`
+          ports:
+            - name: http
+              containerPort: 8096
+          env:
+            - name: LOG_LEVEL
+              value: INFO
+            - name: SYNC_INTERVAL_MINUTES
+              value: "30"
+            - name: LOOKBACK_DAYS
+              value: "30"
+          envFrom:
+            - secretRef:
+                name: keiser-garmin-sync-credentials
+                optional: true
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8096
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 12
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8096
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8096
+            periodSeconds: 60
+          resources:
+            requests:
+              cpu: 25m
+              memory: 96Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: keiser-garmin-sync-data

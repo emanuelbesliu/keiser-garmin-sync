@@ -1,0 +1,24 @@
+# Example config for local / on-demand use.
+# Copy to one of:
+#   ./keiser-garmin-sync.toml   (current directory)
+#   ~/.config/keiser-garmin-sync/config.toml
+# or point at it with:  keiser-garmin-sync --config path/to/config.toml ...
+#
+# Environment variables override anything set here.
+
+[keiser]
+email = "you@example.com"
+password = "your-keiser-password"
+
+[garmin]
+# Seed this once with `keiser-garmin-sync login` (recommended, MFA-safe).
+token_base64 = ""
+# Fallback only (fails under Garmin MFA):
+# email = ""
+# password = ""
+
+[sync]
+lookback_days = 30
+sync_interval_minutes = 30
+min_ride_seconds = 60
+validate_uploads = true

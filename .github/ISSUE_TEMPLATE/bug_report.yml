@@ -1,0 +1,43 @@
+name: bug report
+description: Something isn't syncing or is wrong in Garmin
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! **Do not paste real passwords, tokens, or
+        `GARMIN_TOKEN_BASE64` values.** Redact anything sensitive.
+  - type: dropdown
+    id: mode
+    attributes:
+      label: How are you running it?
+      options:
+        - CLI (pipx/pip) on demand
+        - CLI --loop
+        - Docker / docker-compose
+        - Kubernetes
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+  - type: textarea
+    id: status
+    attributes:
+      label: "`keiser-garmin-sync status --json` output"
+      description: Redact anything sensitive.
+      render: json
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs (`--log-level DEBUG`)
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "`keiser-garmin-sync --version`"

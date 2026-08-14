@@ -1,0 +1,25 @@
+services:
+  keiser-garmin-sync:
+    # Build locally, or use the published image:
+    #   image: ghcr.io/emanuelbesliu/keiser-garmin-sync:latest
+    build: .
+    image: ghcr.io/emanuelbesliu/keiser-garmin-sync:latest
+    container_name: keiser-garmin-sync
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "8096:8096"
+    volumes:
+      # Persists the SQLite dedup store and the Garmin token, so the container
+      # authenticates headlessly across restarts.
+      - keiser-garmin-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8096/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  keiser-garmin-data:
