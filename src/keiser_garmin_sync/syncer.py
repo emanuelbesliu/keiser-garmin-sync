@@ -159,16 +159,21 @@ class Syncer:
             return None
         return str(activity.get("activityId") or activity.get("activityUuidId") or "") or None
 
-    def _find_activity(self, started_at: Any) -> dict[str, Any] | None:
+    def _find_activity(
+        self, started_at: Any, count: int = 10, attempts: int = 6
+    ) -> dict[str, Any] | None:
         """Locate the just-uploaded Garmin activity by start time (best effort).
 
         Called once per upload; the result feeds both type reclassification and
-        validation so we don't poll Garmin twice.
+        validation so we don't poll Garmin twice. The backfill passes a larger
+        ``count`` and ``attempts=1`` to reach older activities in one shot.
         """
         if not (self.cfg.validate_uploads or self.cfg.garmin_activity_type):
             return None
         try:
-            return self.garmin.find_activity_by_start(str(started_at or ""))
+            return self.garmin.find_activity_by_start(
+                str(started_at or ""), attempts=attempts, count=count
+            )
         except Exception as exc:  # noqa: BLE001
             logger.warning("activity lookup failed: %s", exc)
             return None
@@ -227,7 +232,7 @@ class Syncer:
             activity_id = row.get("garmin_activity_id")
             activity: dict[str, Any] | None = None
             if not activity_id:
-                activity = self._find_activity(row.get("started_at"))
+                activity = self._find_activity(row.get("started_at"), count=100, attempts=1)
                 activity_id = self._activity_id_of(activity)
                 if activity_id and not dry_run:
                     self.store.set_garmin_activity_id(int(keiser_id), activity_id)

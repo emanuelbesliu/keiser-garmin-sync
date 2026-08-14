@@ -213,6 +213,7 @@ class GarminUploader:
         match_window_seconds: int = 180,
         attempts: int = 6,
         delay_seconds: float = 5.0,
+        count: int = 10,
     ) -> dict[str, Any] | None:
         """Locate the Garmin activity that corresponds to a Keiser start time.
 
@@ -220,7 +221,8 @@ class GarminUploader:
         take a few seconds to appear. We poll ``get_activities`` and return the
         closest cycling activity whose start time is within
         ``match_window_seconds`` of ``started_at`` (Keiser's ``startedAt``).
-        Returns ``None`` if nothing matches within the retry budget.
+        ``count`` widens the search window (used by the backfill to reach older
+        activities). Returns ``None`` if nothing matches within the retry budget.
         """
         target = _parse_garmin_time(started_at)
         if target is None:
@@ -228,7 +230,7 @@ class GarminUploader:
         g = self.ensure_login()
         for attempt in range(attempts):
             try:
-                activities = g.get_activities(0, 10)
+                activities = g.get_activities(0, count)
             except Exception as exc:  # noqa: BLE001
                 logger.warning("could not list Garmin activities: %s", exc)
                 activities = []
