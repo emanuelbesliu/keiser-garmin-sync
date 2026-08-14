@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "keiser-garmin-sync"
-version = "1.0.0"
+version = "1.1.0"
 description = "Sync Keiser M Series indoor cycling rides to Garmin Connect (cloud-to-cloud, no bridge apps)."
 readme = "README.md"
 requires-python = ">=3.10"

@@ -77,6 +77,23 @@ class Store:
         )
         self._conn.commit()
 
+    def set_garmin_activity_id(self, keiser_id: int, activity_id: str) -> None:
+        """Backfill the Garmin activity id for a ride resolved after the fact."""
+        self._conn.execute(
+            "UPDATE rides SET garmin_activity_id = ?, updated_at = ? WHERE keiser_id = ?",
+            (str(activity_id), time.time(), keiser_id),
+        )
+        self._conn.commit()
+
+    def synced_rides(self, limit: int = 500) -> list[dict[str, Any]]:
+        """Rides we've successfully placed in Garmin (uploaded or duplicate)."""
+        rows = self._conn.execute(
+            "SELECT * FROM rides WHERE status IN ('uploaded','duplicate') "
+            "ORDER BY started_at DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
     def counts(self) -> dict[str, int]:
         rows = self._conn.execute(
             "SELECT status, COUNT(*) c FROM rides GROUP BY status"

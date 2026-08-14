@@ -125,6 +125,7 @@ See [`config.example.toml`](config.example.toml) and
 | `MIN_RIDE_SECONDS` | `60` | Ignore accidental micro-rides |
 | `GRAPH_RESOLUTION` | `3000` | Data points per ride requested from Keiser |
 | `VALIDATE_UPLOADS` | `true` | Re-read the Garmin activity and cross-check totals |
+| `GARMIN_ACTIVITY_TYPE` | `indoor_cycling` | Garmin type applied after upload (`cycling` keeps the outdoor default) |
 | `DB_PATH` | *(data dir)* | SQLite dedup store |
 | `GARMIN_TOKENSTORE` | *(data dir)* | Persisted Garmin token directory |
 | `HTTP_PORT` | `8096` | `serve` port |
@@ -142,7 +143,25 @@ The default data directory is `~/.local/share/keiser-garmin-sync` (override with
 | `sync` | Upload new Keiser rides once (`--loop`, `--dry-run`, `--since N`, `--json`) |
 | `upload FILE` | Upload a single exported `.tcx`/`.fit` (with validation) |
 | `status` | Show sync history / totals (`--json`) |
+| `retype` | Reclassify already-synced Garmin rides to `GARMIN_ACTIVITY_TYPE` (`--type`, `--dry-run`, `--json`) |
 | `serve` | Run the HTTP service (hosted mode; `--host`, `--port`) |
+
+### Indoor vs outdoor cycling
+
+Keiser M Series are stationary bikes, so uploads are classified as Garmin
+**`indoor_cycling`** by default (a TCX only encodes generic "Biking", which
+Garmin would otherwise import as outdoor *cycling*). Change the target with
+`GARMIN_ACTIVITY_TYPE` (e.g. `cycling`, `virtual_ride`). To fix rides that were
+already synced under the wrong type, run a one-off backfill — it only touches
+activities this tool created:
+
+```bash
+keiser-garmin-sync retype --dry-run      # preview
+keiser-garmin-sync retype                 # apply
+```
+
+In hosted mode the same backfill is available as `POST /retype` (optional
+`?target=<type>&dry_run=true`).
 
 ### "My ride is in the app but didn't sync"
 

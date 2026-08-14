@@ -22,3 +22,6 @@ lookback_days = 30
 sync_interval_minutes = 30
 min_ride_seconds = 60
 validate_uploads = true
+# Garmin activity type applied after upload (Keiser = stationary bikes).
+# "indoor_cycling" (default) or "cycling" to keep Garmin's outdoor default.
+garmin_activity_type = "indoor_cycling"

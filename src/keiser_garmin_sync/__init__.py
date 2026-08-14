@@ -7,4 +7,4 @@ as a one-shot CLI (``keiser-garmin-sync sync``) or a long-running service
 from __future__ import annotations
 
 __all__ = ["__version__"]
-__version__ = "1.0.0"
+__version__ = "1.1.0"

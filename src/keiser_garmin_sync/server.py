@@ -43,7 +43,7 @@ def create_app(cfg: Config | None = None):
     store = Store(cfg.db_path)
     syncer = Syncer(cfg, store)
 
-    app = FastAPI(title="Keiser -> Garmin Sync", version="1.0.0")
+    app = FastAPI(title="Keiser -> Garmin Sync", version="1.1.0")
     state: dict[str, Any] = {
         "started_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "last_cycle": None,
@@ -130,6 +130,14 @@ def create_app(cfg: Config | None = None):
         if state["running"]:
             return JSONResponse({"status": "already_running"}, status_code=409)
         result = await asyncio.to_thread(_do_cycle)
+        return JSONResponse({"status": "ok", "result": result})
+
+    @app.post("/retype")
+    async def retype(target: str | None = None, dry_run: bool = False) -> JSONResponse:
+        """Backfill already-synced rides to the configured (or given) Garmin type."""
+        result = await asyncio.to_thread(
+            syncer.retype_synced, target, dry_run
+        )
         return JSONResponse({"status": "ok", "result": result})
 
     return app

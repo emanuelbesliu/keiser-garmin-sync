@@ -4,6 +4,17 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-08-14
+
+### Added
+- **Indoor-cycling classification.** Uploaded rides are now reclassified in
+  Garmin to the type in `GARMIN_ACTIVITY_TYPE` (default **`indoor_cycling`**) —
+  a TCX only encodes generic "Biking", which Garmin would otherwise import as
+  outdoor *cycling*. Set to `cycling` to keep the old behaviour.
+- **`retype` command / `POST /retype`** — one-off backfill that reclassifies
+  already-synced rides to the target type. Only touches activities this tool
+  created; supports `--dry-run` / `--type`.
+
 ## [1.0.0] - 2026-08-14
 
 First public release.

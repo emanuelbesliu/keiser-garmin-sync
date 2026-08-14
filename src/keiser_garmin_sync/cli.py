@@ -187,6 +187,41 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_retype(args: argparse.Namespace) -> int:
+    from .store import Store
+    from .syncer import Syncer
+
+    cfg = _load_cfg(args)
+    _configure_logging(cfg.log_level)
+
+    if not cfg.garmin_ready:
+        print(
+            "Garmin not configured. Run 'keiser-garmin-sync login' first, or set "
+            "GARMIN_TOKEN_BASE64.",
+            file=sys.stderr,
+        )
+        return 2
+
+    store = Store(cfg.db_path)
+    syncer = Syncer(cfg, store)
+    result = syncer.retype_synced(
+        target=args.activity_type, dry_run=args.dry_run, limit=args.limit
+    )
+
+    if args.json:
+        print(json.dumps(result, indent=2, default=str))
+    else:
+        verb = "would change" if args.dry_run else "changed"
+        print(
+            f"retype -> {result['target']}: checked {result['checked']}, "
+            f"{verb} {result['updated']}, already {result['already']}, "
+            f"unresolved {result['unresolved']}, errors {result['errors']}"
+        )
+        for m in result.get("messages", []):
+            print(f"  {m}")
+    return 1 if result.get("errors") else 0
+
+
 def cmd_serve(args: argparse.Namespace) -> int:
     from .server import run_server
 
@@ -294,6 +329,19 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--limit", type=int, default=10, help="recent rows to show")
     sp.add_argument("--json", action="store_true", help="machine-readable output")
     sp.set_defaults(func=cmd_status)
+
+    sp = sub.add_parser(
+        "retype",
+        help="reclassify already-synced Garmin rides (e.g. cycling -> indoor_cycling)",
+    )
+    sp.add_argument(
+        "--type", dest="activity_type", default=None,
+        help="target Garmin activity type (default: GARMIN_ACTIVITY_TYPE / indoor_cycling)",
+    )
+    sp.add_argument("--dry-run", action="store_true", help="show changes; change nothing")
+    sp.add_argument("--limit", type=int, default=500, help="max synced rides to scan")
+    sp.add_argument("--json", action="store_true", help="machine-readable output")
+    sp.set_defaults(func=cmd_retype)
 
     sp = sub.add_parser("serve", help="run the HTTP service (hosted mode)")
     sp.add_argument("--host", default="0.0.0.0")

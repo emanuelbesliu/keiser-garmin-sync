@@ -24,6 +24,29 @@ from garth.exc import GarthHTTPError
 logger = logging.getLogger("keiser-garmin-sync.garmin")
 
 
+# Garmin activity-type table (typeId, typeKey, parentTypeId) for the cycling
+# family, sourced from Garmin's own /activity-types endpoint. Used to reclassify
+# an uploaded ride: TCX only encodes Sport="Biking", which Garmin ingests as the
+# outdoor "cycling" type, so indoor rides must be re-typed via the API.
+GARMIN_CYCLING_TYPES: dict[str, tuple[int, str, int]] = {
+    "indoor_cycling": (25, "indoor_cycling", 2),
+    "cycling": (2, "cycling", 17),
+    "virtual_ride": (152, "virtual_ride", 2),
+    "road_biking": (10, "road_biking", 2),
+    "mountain_biking": (5, "mountain_biking", 2),
+    "gravel_cycling": (143, "gravel_cycling", 2),
+}
+
+
+def activity_type_key(activity: dict[str, Any]) -> str:
+    """Extract the Garmin activity typeKey from a summary or detail payload."""
+    for field in ("activityType", "activityTypeDTO"):
+        block = activity.get(field)
+        if isinstance(block, dict) and block.get("typeKey"):
+            return str(block["typeKey"])
+    return ""
+
+
 def _parse_garmin_time(value: Any) -> datetime | None:
     """Parse a Garmin ``startTimeGMT`` ("2026-08-13 15:29:21") as UTC."""
     if not value:
@@ -157,6 +180,32 @@ class GarminUploader:
             "status_code": status_code,
             "raw": body,
         }
+
+    def set_activity_type(self, activity_id: str, type_key: str) -> bool:
+        """Reclassify a Garmin activity (e.g. cycling -> indoor_cycling).
+
+        Returns True if the change was applied. Unknown ``type_key`` values are
+        rejected with a ValueError so a typo in config fails loudly.
+        """
+        ids = GARMIN_CYCLING_TYPES.get(type_key)
+        if ids is None:
+            raise ValueError(
+                f"unknown garmin activity type '{type_key}'; "
+                f"known: {', '.join(sorted(GARMIN_CYCLING_TYPES))}"
+            )
+        g = self.ensure_login()
+        g.set_activity_type(str(activity_id), ids[0], ids[1], ids[2])
+        logger.info("set Garmin activity %s type -> %s", activity_id, type_key)
+        return True
+
+    def get_activity_type_key(self, activity_id: str) -> str:
+        """Return the current typeKey of a Garmin activity ("" if unknown)."""
+        g = self.ensure_login()
+        try:
+            return activity_type_key(g.get_activity(str(activity_id)) or {})
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("could not read activity %s type: %s", activity_id, exc)
+            return ""
 
     def find_activity_by_start(
         self,

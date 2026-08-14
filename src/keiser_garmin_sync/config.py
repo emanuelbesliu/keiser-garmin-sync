@@ -76,6 +76,7 @@ _ENV_TO_FIELD = {
     "VALIDATE_UPLOADS": ("validate_uploads", bool),
     "DB_PATH": ("db_path", str),
     "ACTIVITY_NAME": ("activity_name", str),
+    "GARMIN_ACTIVITY_TYPE": ("garmin_activity_type", str),
     "HTTP_PORT": ("http_port", int),
     "LOG_LEVEL": ("log_level", str),
 }
@@ -170,6 +171,11 @@ class Config:
     # --- runtime ---
     db_path: str = ""
     activity_name: str = "Keiser Indoor Cycling"
+    # Garmin activity type applied after upload. Keiser M Series are stationary
+    # bikes, so the sensible default is "indoor_cycling" (Garmin uploads TCX
+    # "Biking" as outdoor "cycling", which we correct via the API). Set to
+    # "cycling" to keep Garmin's default, or any key in garmin.GARMIN_CYCLING_TYPES.
+    garmin_activity_type: str = "indoor_cycling"
     http_port: int = 8096
     log_level: str = "INFO"
 
