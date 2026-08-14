@@ -40,7 +40,9 @@ jobs:
   pypi:
     runs-on: ubuntu-latest
     # Publish to PyPI via trusted publishing (configure the project on PyPI first).
-    # Remove this job if you don't want a PyPI release.
+    # Gated behind the PUBLISH_PYPI repo variable so releases don't fail before
+    # the PyPI trusted publisher is configured. Set the variable to 'true' to enable.
+    if: vars.PUBLISH_PYPI == 'true'
     environment: pypi
     permissions:
       id-token: write
