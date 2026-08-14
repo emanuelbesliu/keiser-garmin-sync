@@ -56,7 +56,7 @@ Useful flags: `sync --dry-run` (show what would upload, change nothing),
 docker run --rm -v keiser-garmin:/data \
   -e KEISER_EMAIL=you@example.com -e KEISER_PASSWORD=... \
   -e GARMIN_TOKEN_BASE64="$(cat token.b64)" \
-  ghcr.io/emanuelbesliu/keiser-garmin-sync:latest sync
+  ghcr.io/emanuelbesliu/keiser-garmin-sync-app:latest sync
 ```
 
 ### 3. Self-hosted service — Docker Compose

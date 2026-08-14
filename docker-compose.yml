@@ -1,9 +1,9 @@
 services:
   keiser-garmin-sync:
     # Build locally, or use the published image:
-    #   image: ghcr.io/emanuelbesliu/keiser-garmin-sync:latest
+    #   image: ghcr.io/emanuelbesliu/keiser-garmin-sync-app:latest
     build: .
-    image: ghcr.io/emanuelbesliu/keiser-garmin-sync:latest
+    image: ghcr.io/emanuelbesliu/keiser-garmin-sync-app:latest
     container_name: keiser-garmin-sync
     restart: unless-stopped
     env_file:
