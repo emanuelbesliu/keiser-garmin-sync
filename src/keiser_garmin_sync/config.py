@@ -26,8 +26,11 @@ from typing import Any
 
 try:  # Python 3.11+
     import tomllib  # type: ignore[attr-defined]
-except ModuleNotFoundError:  # pragma: no cover - 3.10 fallback
-    tomllib = None  # type: ignore[assignment]
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback
+    try:
+        import tomli as tomllib  # type: ignore[no-redef]
+    except ModuleNotFoundError:
+        tomllib = None  # type: ignore[assignment]
 
 APP_NAME = "keiser-garmin-sync"
 
